@@ -1,7 +1,7 @@
 package org.example.service;
 
 import org.example.exception.UserNotFoundException;
-import org.example.model.User;
+import org.example.model.UserData;
 import org.example.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,18 +20,18 @@ public class UserService {
 
   private static final String USER_CACHE = "USER";
 
-  public User saveUser(User user) {
-    User savedUser = userRepository.save(user);
-    redisTemplate.opsForHash().put(USER_CACHE, savedUser.getId(), savedUser);
-    return savedUser;
+  public UserData saveUser(UserData userData) {
+    UserData savedUserData = userRepository.save(userData);
+    redisTemplate.opsForHash().put(USER_CACHE, savedUserData.getId(), savedUserData);
+    return savedUserData;
   }
 
-  public Optional<User> getUserById(Long id) {
-    User cachedUser = (User) redisTemplate.opsForHash().get(USER_CACHE, id);
-    if (cachedUser != null) {
-      return Optional.of(cachedUser);
+  public Optional<UserData> getUserById(Long id) {
+    UserData cachedUserData = (UserData) redisTemplate.opsForHash().get(USER_CACHE, id);
+    if (cachedUserData != null) {
+      return Optional.of(cachedUserData);
     } else {
-      Optional<User> user = userRepository.findById(id);
+      Optional<UserData> user = userRepository.findById(id);
       user.ifPresent(value -> redisTemplate.opsForHash().put(USER_CACHE, id, value));
       return Optional.ofNullable(
           user.orElseThrow(() -> new UserNotFoundException("User not found with id: " + id)));
